@@ -58,6 +58,7 @@ func openDB(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
+// TODO How to get DSN key from docker file?
 func connectToDB() *sql.DB {
 	dsn := os.Getenv("DSN")
 
