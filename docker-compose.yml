@@ -1,41 +1,54 @@
-version: '3'
+version: '3' # Specifies the Docker Compose file format version.
 
-services:
+services: # Defines the services to be orchestrated.
 
+  # Service: Broker Service
   broker-service:
     build:
-      context: ./broker-service
-      dockerfile: ./broker-service.dockerfile
-    restart: always
+      context: ./broker-service # Path to the source code and Dockerfile for the broker service.
+      dockerfile: ./broker-service.dockerfile # Specifies the Dockerfile for building this service.
+    restart: always # Ensures the service restarts automatically on failure.
     ports:
-      - "8080:80"
+      - "8080:80" # Maps port 80 inside the container to port 8080 on the host machine.
     deploy:
-      mode: replicated
-      replicas: 1
+      mode: replicated # Specifies the deployment mode as replicated (for use in Docker Swarm).
+      replicas: 1 # Runs one instance of the service.
 
+  # Service: Authentication Service
   authentication-service:
     build:
-      context: ./authentication-service
-      dockerfile: ./authentication-service.dockerfile
-    restart: always
+      context: ./authentication-service # Path to the source code and Dockerfile for the authentication service.
+      dockerfile: ./authentication-service.dockerfile # Specifies the Dockerfile for building this service.
+    restart: always # Ensures the service restarts automatically on failure.
     ports:
-      - "8081:80"
+      - "8081:80" # Maps port 80 inside the container to port 8081 on the host machine.
     deploy:
-      mode: replicated
-      replicas: 1
-    environment:
+      mode: replicated # Specifies the deployment mode as replicated (for use in Docker Swarm).
+      replicas: 1 # Runs one instance of the service.
+    environment: # Defines environment variables for the container.
       DSN: "host=postgres user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
+        # DSN (Database Source Name) for connecting to the PostgreSQL database:
+        # - host=postgres: Connects to the `postgres` service defined below.
+        # - user=postgres: Uses the username `postgres`.
+        # - password=password: Uses the password `password`.
+        # - dbname=users: Connects to the `users` database.
+        # - sslmode=disable: Disables SSL for the connection.
+        # - timezone=UTC: Sets the timezone to UTC.
+      # - connect_timeout=5: Sets the database connection timeout to 5 seconds.
 
+  # Service: PostgreSQL Database
   postgres:
-    image: 'postgres:14.2'
+    image: 'postgres:14.2' # Uses the official PostgreSQL 14.2 Docker image.
     ports:
-      - "5432:5432"
+      - "5432:5432" # Maps port 5432 inside the container to port 5432 on the host machine.
     deploy:
-      mode: replicated
-      replicas: 1
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: users
-    volumes:
+      mode: replicated # Specifies the deployment mode as replicated (for use in Docker Swarm).
+      replicas: 1 # Runs one instance of the service.
+    environment: # Defines environment variables for configuring PostgreSQL.
+      POSTGRES_USER: postgres # Sets the database username.
+      POSTGRES_PASSWORD: password # Sets the database password.
+      POSTGRES_DB: users # Sets the default database name.
+    volumes: # Maps a host directory to the container for data persistence.
       - ./db-data/postgres/:/var/lib/postgresql/data/
+        # Host directory (`./db-data/postgres/`) is mapped to PostgreSQL's data directory inside the container.
+      # This ensures database data is retained even if the container is stopped or recreated.
