@@ -12,20 +12,21 @@ import (
 var client *mongo.Client
 
 type LogEntry struct {
-	ID        string    `json:"id" bson:"_id"`
-	Name      string    `json:"name" bson:"name"`
-	Data      string    `json:"data" bson:"data"`
-	CreatedAt time.Time `json:"created_at" bson:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
+	ID        string    `bson:"_id,omitempty" json:"id,omitempty"`
+	Name      string    `bson:"name" json:"name"`
+	Data      string    `bson:"data" json:"data"`
+	CreatedAt time.Time `bson:"created_at" json:"created_at"`
+	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
 }
 
 type Models struct {
 	LogEntry LogEntry
 }
 
-func New(mongo *mongo.Client) *Models {
+func New(mongo *mongo.Client) Models {
 	client = mongo
-	return &Models{
+
+	return Models{
 		LogEntry: LogEntry{},
 	}
 }
@@ -33,7 +34,6 @@ func New(mongo *mongo.Client) *Models {
 func (l *LogEntry) Insert(entry LogEntry) error {
 	collection := client.Database("logs").Collection("logs")
 	_, err := collection.InsertOne(context.TODO(), LogEntry{
-		ID:        entry.ID,
 		Name:      entry.Name,
 		Data:      entry.Data,
 		CreatedAt: time.Now(),
