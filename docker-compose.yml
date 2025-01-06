@@ -45,6 +45,26 @@ services: # Defines the services to be orchestrated.
       # - timezone=UTC: Sets the timezone to UTC.
       # - connect_timeout=5: Sets the database connection timeout to 5 seconds.
 
+  mail-service:
+    build:
+      context: ./mail-service
+      dockerfile: ./mail-service.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      MAIL_DOMAIN: localhost
+      MAIL_HOST: mailhog # Connects to the mailhog service for email testing
+      MAIL_PORT: 1025   # The default SMTP port used by Mailhog
+      MAIL_USER: ""   # Optional, depending on Mailhog configuration
+      MAIL_PASS: "" # Optional, depending on Mailhog configuration
+      FROM_EMAIL: "noreply@example.com" # Default from address for sending emails
+      FROM_NAME: "Samed Arslan"
+    depends_on:
+       - mailhog
+
+
   # Service: PostgreSQL Database
   postgres:
     image: 'postgres:14.2' # Uses the official PostgreSQL 14.2 Docker image.
@@ -72,3 +92,9 @@ services: # Defines the services to be orchestrated.
       MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - ./db-data/mongo/:/data/db
+
+  mailhog:
+    image: "mailhog/mailhog"
+    ports:
+      - "1025:1025"
+      - "8025:8025"
