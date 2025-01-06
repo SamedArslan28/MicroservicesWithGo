@@ -1,5 +1,3 @@
-version: '3' # Specifies the Docker Compose file format version.
-
 services: # Defines the services to be orchestrated.
 
   # Service: Broker Service
@@ -61,8 +59,7 @@ services: # Defines the services to be orchestrated.
       MAIL_PASS: "" # Optional, depending on Mailhog configuration
       FROM_EMAIL: "noreply@example.com" # Default from address for sending emails
       FROM_NAME: "Samed Arslan"
-    depends_on:
-       - mailhog
+      MAIL_ENCRYPTION: none
 
 
   # Service: PostgreSQL Database
