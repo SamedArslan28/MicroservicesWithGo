@@ -61,6 +61,14 @@ services: # Defines the services to be orchestrated.
       FROM_NAME: "Samed Arslan"
       MAIL_ENCRYPTION: none
 
+  listener-service:
+    build:
+      context: ./listener-service
+      dockerfile: listener-service.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
 
   # Service: PostgreSQL Database
   postgres:
