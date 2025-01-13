@@ -50,6 +50,9 @@ func main() {
 		return
 	}
 	go app.rpcListen()
+
+	go app.gRPCListen()
+
 	fmt.Printf("Starting server on port %s\n", webPort)
 
 	srv := &http.Server{

@@ -31,7 +31,7 @@ type Models struct {
 	User User
 }
 
-// User is the structure which holds one user from the database.
+// User is the structure that holds one user from the database.
 type User struct {
 	ID        int       `json:"id"`
 	Email     string    `json:"email"`

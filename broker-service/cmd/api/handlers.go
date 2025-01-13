@@ -2,11 +2,16 @@ package main
 
 import (
 	"broker/event"
+	"broker/logs"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
 	"net/rpc"
+	"time"
 )
 
 type RequestPayload struct {
@@ -186,7 +191,11 @@ func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {
 	payload.Error = false
 	payload.Message = "Message sent to " + msg.To
 
-	app.writeJSON(w, http.StatusAccepted, payload)
+	err = app.writeJSON(w, http.StatusAccepted, payload)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
 
 }
 
@@ -202,7 +211,11 @@ func (app *Config) logEventViaRabbit(w http.ResponseWriter, l LogPayload) {
 	payload.Error = false
 	payload.Message = "logged via RabbitMQ"
 
-	app.writeJSON(w, http.StatusAccepted, payload)
+	err = app.writeJSON(w, http.StatusAccepted, payload)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
 }
 
 // pushToQueue pushes a message into RabbitMQ
@@ -253,5 +266,38 @@ func (app *Config) logItemViaRPC(w http.ResponseWriter, l LogPayload) {
 	}
 
 	app.writeJSON(w, http.StatusAccepted, payload)
+}
 
+func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
+	var requestPayload RequestPayload
+	err := app.readJSON(w, r, &requestPayload)
+
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+	conn, err := grpc.NewClient("logger-service:50001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+	defer conn.Close()
+	client := logs.NewLogServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10000*time.Second)
+	defer cancel()
+	_, err = client.WriteLog(ctx, &logs.LogRequest{
+		LogEntry: &logs.Log{
+			Name: requestPayload.Log.Name,
+			Data: requestPayload.Log.Data,
+		},
+	})
+
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+	var payload jsonResponse
+	payload.Error = false
+	payload.Message = "Logged via GRPC"
+	err = app.writeJSON(w, http.StatusAccepted, payload)
 }
