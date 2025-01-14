@@ -283,7 +283,7 @@ func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	client := logs.NewLogServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 10000*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	_, err = client.WriteLog(ctx, &logs.LogRequest{
 		LogEntry: &logs.Log{

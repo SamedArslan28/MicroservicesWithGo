@@ -1,22 +1,42 @@
-syntax = "proto3";
+syntax = "proto3"; // Specifies the version of Protocol Buffers syntax being used.
 
-package logs;
+package logs; // Defines the package name for this proto file.
 
 option go_package = "/logs";
+// Specifies the Go package path where the generated Go code will reside.
+// This helps in organizing and importing the generated files in Go projects.
 
+/**
+ * Represents a single log entry with a name and data.
+ */
 message Log {
-  string name = 1;
-  string data = 2;
+  string name = 1; // The name of the log entry (e.g., log type or identifier).
+  string data = 2; // The data or content associated with the log entry.
 }
 
+/**
+ * Request message for writing a log.
+ */
 message LogRequest {
-  Log logEntry = 1;
+  Log logEntry = 1; // The log entry to be written.
 }
 
+/**
+ * Response message for the log writing operation.
+ */
 message LogResponse {
-  string result = 1;
+  string result = 1; // The result of the log writing operation (e.g., success or error message).
 }
 
+/**
+ * Service definition for handling log operations.
+ * Includes methods for creating and managing logs.
+ */
 service LogService {
+  /**
+   * Writes a log entry.
+   * @param LogRequest The request containing the log to write.
+   * @return LogResponse The response indicating the outcome of the operation.
+   */
   rpc WriteLog(LogRequest) returns (LogResponse);
 }
